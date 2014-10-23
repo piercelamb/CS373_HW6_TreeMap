@@ -13,63 +13,145 @@ public class TreeMap<K extends Comparable<K>, V> extends AbstractTreeMap<K, V> {
 		
 	// TODO: comment header
 	public String toString() {
-		return inorder(root);
+		if (super.isEmpty()){
+			return "{}";
+		}
+		System.out.print("{");
+		String finalString = inorder(root);
+		return finalString.substring(0, finalString.length()-2)+"}";
 	}
 	
 	 protected String inorder(TreeNode node) {
 			if (node==null)
 			    return "";
-			return inorder(node.left) + " " + node.key + " " + inorder(node.right);
+			 return inorder(node.left) + node.key + "=" + node.value + ", " + inorder(node.right);
+			 
 	 }
-//	
-//	private String traverseString(TreeNode node){
-//		String finalString = "{";
-//		String kv = "";
-//		String rightkv = "";
-//		
-//		if (node!= null) { 
-//			 // recursive case: print left, center, right 
-//			 traverseString(node.left); 
-//			 kv = node.key+"="+node.value+" ";
-//			 System.out.print(kv); 
-//			 traverseString(root.right);
-//			 System.out.print(kv); 
-		
-		
-//		if (node == null) {
-//			return "";
-//		} else {
-//			if (node.left != null) {
-//				TreeNode left = node.left;
-//				leftkv = leftkv + left.key+left.value;
-//				traverseString(left);
-//			}
-//			
-//			if (node.right != null) {
-//				TreeNode right = node.right;
-//				rightkv = rightkv + right.key+right.value;
-//				traverseString(right);
-//			}
-			
-//		}
-//		return finalString = finalString + kv+"}";
-//		}
+	private int balanceFactor(TreeNode root){
+		int balanceFactor = 0;
+		if(root.right == null && root.left != null) {
+			balanceFactor = 0-root.left.height;
+		}else if(root.left == null && root.right != null){
+			balanceFactor = root.right.height - 0;
+		}else if (root.left == null && root.right == null){
+			balanceFactor = 0;
+		}else{
+			balanceFactor = root.right.height - root.left.height;
+		}
+		return balanceFactor;
+	}
 	
-	// Overriding the AbstractTreeMap put helper method
+	private int childBalanceFactorLeft(TreeNode root){
+		int childBalanceFactor = 0;
+		if(root.left.left == null && root.left.right !=null){
+			childBalanceFactor = root.left.right.height-0;
+		} else if (root.left.right == null && root.left.left != null){
+			childBalanceFactor = 0-root.left.left.height;
+		}else if (root.left.left == null && root.left.right == null){
+			childBalanceFactor = 0;
+		}else{
+			childBalanceFactor = root.left.right.height - root.left.left.height;
+		}
+		return childBalanceFactor;
+	}
+	private int childBalanceFactorRight(TreeNode root){
+		int childBalanceFactor = 0;
+		if(root.right.left == null && root.right.right !=null){
+			childBalanceFactor = root.right.right.height-0;
+		} else if (root.right.right == null && root.right.left != null){
+			childBalanceFactor = 0-root.right.left.height;
+		}else if (root.right.left == null && root.right.right == null){
+			childBalanceFactor = 0;
+		}else{
+			childBalanceFactor = root.right.right.height - root.right.left.height;
+		}
+		return childBalanceFactor;
+	}
+	
 	protected TreeNode put(TreeNode node, K key, V value) {
-		root = super.put(root, key, value);
-	 // get root churning through .put
-//		int heightLeft = super.computeHeight(node.left);
-//		int heightRight = super.computeHeight(node.right);
-//		System.out.println(heightLeft);
-//		System.out.println(heightRight);
+		root = super.put(node, key, value);	
+		//determine balanceFactor
+		int balanceFactor = balanceFactor(root);
+		//perform rotation if balanceFactor is >1 or <-1
+		if (balanceFactor < -1){
+			//figure out left side childBalanceFactor
+			int childBalanceFactor = childBalanceFactorLeft(root);
+			//perform rotation based on left side childBalanceFactor
+			if(childBalanceFactor < 0){
+				rightRotate(root);
+			}else if (childBalanceFactor > 0){
+				leftRotate(rightRotate(root));
+			}
+			
+		}else if (balanceFactor > 1){
+			//figure out right side childBalanceFactor
+			int childBalanceFactor = childBalanceFactorRight(root);
+			//perform rotation based on left side childBalanceFactor
+			if(childBalanceFactor < 0){
+				rightRotate(leftRotate(root));
+			}else if (childBalanceFactor > 0){
+				leftRotate(root);
+			}
+		}
 		
 		return root;
 	}
 	
+	private TreeNode rightRotate(TreeNode oldParent) {
+		// 1. detach left child's right subtree
+		TreeNode orphan = oldParent.left.right;
+		// 2. consider left child to be the new parent
+		TreeNode newParent = oldParent.left;
+		// 3. attach old parent onto right of new parent
+		newParent.right = oldParent;
+		// 4. attach new parent's old right subtree as
+		// left subtree of old parent
+		oldParent.left = orphan;
+		oldParent.height = computeHeight(oldParent); // update nodes'
+		newParent.height = computeHeight(newParent); // height values
+		return newParent;
+		}
+	
+	private TreeNode leftRotate(TreeNode oldParent) {
+		// 1. detach right child's left subtree
+		TreeNode orphan = oldParent.right.left;
+		// 2. consider right child to be the new parent
+		TreeNode newParent = oldParent.right;
+		// 3. attach old parent onto left of new parent
+		newParent.left = oldParent;
+		// 4. attach new parent's old left subtree as
+		// right subtree of old parent
+		oldParent.right = orphan;
+		oldParent.height = computeHeight(oldParent); // update nodes'
+		newParent.height = computeHeight(newParent); // height values
+		return newParent;
+		}
 	// TODO: comment header
 	protected TreeNode remove(TreeNode node, K key) {
-		// TODO: implement this method
-		return super.remove(node, key);
+		super.remove(node, key);
+		int balanceFactor = balanceFactor(root);
+		//perform rotation if balanceFactor is >1 or <-1
+				if (balanceFactor < -1){
+					//figure out left side childBalanceFactor
+					int childBalanceFactor = childBalanceFactorLeft(root);
+					//perform rotation based on left side childBalanceFactor
+					if(childBalanceFactor < 0 || childBalanceFactor == 0){
+						rightRotate(root);
+					}else if (childBalanceFactor > 0){
+						leftRotate(rightRotate(root));
+					}
+					
+				}else if (balanceFactor > 1){
+					//figure out right side childBalanceFactor
+					int childBalanceFactor = childBalanceFactorRight(root);
+					//perform rotation based on left side childBalanceFactor
+					if(childBalanceFactor < 0){
+						rightRotate(leftRotate(root));
+					}else if (childBalanceFactor > 0 || childBalanceFactor == 0){
+						leftRotate(root);
+					}
+				}
+				
+				return root;
 	}
 }

@@ -11,6 +11,18 @@ public class minitest {
 		System.out.println(test.toString());
 		test.put(15, "rofl");
 		System.out.println(test.toString());
+		test.put(62, "topkek");
+		System.out.println(test);
+		test.put(100, "topkek");
+		System.out.println(test);
+		test.put(2, "topkek");
+		System.out.println(test);
+		test.put(81, "topkek");
+		System.out.println(test);
+		test.put(11, "topkek");
+		System.out.println(test);
+		test.put(18, "topkek");
+		System.out.println(test);
 	}
 
 }

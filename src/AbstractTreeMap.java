@@ -249,8 +249,6 @@ public abstract class AbstractTreeMap<K extends Comparable<K>, V> implements Map
 			node = new TreeNode(key, value);   // reached dead end; put new node here
 			size++;
 		} else if (key.compareTo(node.key) > 0) {
-			System.out.println(key);
-			System.out.println(node.key);
 			node.right = put(node.right, key, value);
 		} else if (key.compareTo(node.key) < 0)
 		{
